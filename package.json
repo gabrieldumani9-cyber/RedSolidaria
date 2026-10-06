@@ -3,8 +3,8 @@
   "private": true,
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build"
+    "start": "node scripts/prepare-supabase-env.mjs && ng serve",
+    "build": "node scripts/prepare-supabase-env.mjs && ng build"
   },
   "dependencies": {
     "@angular/common": "^21.1.0",
