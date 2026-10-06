@@ -1,0 +1,23 @@
+{
+  // .vscode/extensions.json
+  // Extensiones recomendadas para RedSolidaria (Angular + Firebase + Leaflet + Tailwind + TypeScript)
+  "recommendations": [
+    "angular.ng-template",
+    "natewallace.angular2-switcher",
+    "infinity1207.angular2-switcher",
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "ms-vscode.vscode-typescript-next",
+    "bradlc.vscode-tailwindcss",
+    "firebase.vscode-firestore",
+    "firebase.vscode-firebase",
+    "redhat.vscode-yaml",
+    "cschlosser.doxdocgen",
+    "streetsidesoftware.code-spell-checker",
+    "streetsidesoftware.code-spell-checker-spanish",
+    "eamodio.gitlens",
+    "mhutchie.git-graph",
+    "ms-azuretools.vscode-docker",
+    "ritwickdey.liveserver"
+  ]
+}

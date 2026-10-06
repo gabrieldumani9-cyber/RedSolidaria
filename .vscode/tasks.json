@@ -1,0 +1,46 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Servidor de desarrollo",
+      "type": "npm",
+      "script": "start",
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "angular",
+        "fileLocation": "relative",
+        "pattern": {
+          "regexp": "^\\s*(\\S.*?)\\s+(\\d+):(\\d+)\\s+(error|warning)\\s+(.*)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "severity": 4,
+          "message": 5
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^\\s*\\*\\* Angular Live Development Server",
+          "endsPattern": "^\\s*\\*\\* Compiled successfully"
+        }
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "group": { "kind": "build", "isDefault": true }
+    },
+    {
+      "label": "Compilar proyecto",
+      "type": "npm",
+      "script": "build",
+      "problemMatcher": ["$tsc"],
+      "presentation": { "reveal": "always", "panel": "new" }
+    },
+    {
+      "label": "Instalar dependencias",
+      "type": "shell",
+      "command": "npm install",
+      "presentation": { "reveal": "always", "panel": "new" }
+    }
+  ]
+}
