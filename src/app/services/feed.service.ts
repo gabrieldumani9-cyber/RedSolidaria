@@ -1,6 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { supabase } from '../../environments/supabase.config';
 import { Post, MediaAttachment, Report, ReportReason } from '../models/models';
+import { RealtimePostgresChangesPayload } from '@supabase/supabase-js';
 
 @Injectable({ providedIn: 'root' })
 export class FeedService {
@@ -16,12 +17,59 @@ export class FeedService {
     this.loadingSignal.set(true);
     this.fetchPosts();
 
+    // Subscribe to real-time changes
     this.channel = supabase
       .channel('posts-changes')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'posts' }, () => {
-        this.fetchPosts();
-      })
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'posts' },
+        (payload: RealtimePostgresChangesPayload<any>) => {
+          this.handleInsert(payload.new);
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'posts' },
+        (payload: RealtimePostgresChangesPayload<any>) => {
+          this.handleUpdate(payload.new);
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'DELETE', schema: 'public', table: 'posts' },
+        (payload: RealtimePostgresChangesPayload<any>) => {
+          this.handleDelete(payload.old.id);
+        }
+      )
       .subscribe();
+  }
+
+  private handleInsert(newPost: any): void {
+    const post: Post = this.mapRowToPost(newPost);
+    this.postsSignal.update((posts) => [post, ...posts]);
+  }
+
+  private handleUpdate(updatedPost: any): void {
+    const post: Post = this.mapRowToPost(updatedPost);
+    this.postsSignal.update((posts) =>
+      posts.map((p) => (p.id === post.id ? post : p))
+    );
+  }
+
+  private handleDelete(postId: string): void {
+    this.postsSignal.update((posts) => posts.filter((p) => p.id !== postId));
+  }
+
+  private mapRowToPost(r: any): Post {
+    return {
+      id: r.id,
+      authorUid: r.author_uid,
+      authorName: r.author_name,
+      authorAvatar: r.author_avatar,
+      text: r.text ?? '',
+      media: r.media ?? undefined,
+      timestamp: new Date(r.created_at).getTime(),
+    };
   }
 
   private async fetchPosts(): Promise<void> {
@@ -36,16 +84,7 @@ export class FeedService {
       return;
     }
 
-    const posts: Post[] = (data ?? []).map((r: any) => ({
-      id: r.id,
-      authorUid: r.author_uid,
-      authorName: r.author_name,
-      authorAvatar: r.author_avatar,
-      text: r.text ?? '',
-      media: r.media ?? undefined,
-      timestamp: new Date(r.created_at).getTime(),
-    }));
-
+    const posts: Post[] = (data ?? []).map((r: any) => this.mapRowToPost(r));
     this.postsSignal.set(posts);
     this.loadingSignal.set(false);
   }
@@ -64,6 +103,22 @@ export class FeedService {
       text,
       media: media ?? null,
     });
+    if (error) throw error;
+  }
+
+  async updatePost(postId: string, text: string): Promise<void> {
+    const { error } = await supabase
+      .from('posts')
+      .update({ text })
+      .eq('id', postId);
+    if (error) throw error;
+  }
+
+  async deletePost(postId: string): Promise<void> {
+    const { error } = await supabase
+      .from('posts')
+      .delete()
+      .eq('id', postId);
     if (error) throw error;
   }
 
