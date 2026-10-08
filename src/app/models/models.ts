@@ -193,6 +193,44 @@ export interface AppUser {
   photoURL: string;
 }
 
+// ─── Private Messaging models ───────────────────────────
+
+export type MessageRequestStatus = 'pending' | 'accepted' | 'declined';
+
+export interface MessageRequest {
+  id: string;
+  sender_id: string;
+  sender_name: string;
+  sender_avatar: string;
+  receiver_id: string;
+  status: MessageRequestStatus;
+  created_at: string;
+}
+
+export interface Conversation {
+  id: string;
+  participant_1: string;
+  participant_1_name: string;
+  participant_1_avatar: string;
+  participant_2: string;
+  participant_2_name: string;
+  participant_2_avatar: string;
+  created_at: string;
+  last_message?: string;
+  last_message_at?: string;
+}
+
+export interface PrivateMessage {
+  id: string;
+  conversation_id: string;
+  sender_id: string;
+  sender_name: string;
+  sender_avatar: string;
+  content: string;
+  media?: MediaAttachment;
+  created_at: string;
+}
+
 export const REPORT_REASONS: { value: ReportReason; label: string }[] = [
   { value: 'spam', label: 'Spam' },
   { value: 'inappropriate', label: 'Contenido inapropiado' },
@@ -212,6 +250,16 @@ export function avatarUrl(name: string): string {
 
 export function formatTime(ts: number): string {
   const d = new Date(ts);
+  const now = new Date();
+  const diff = now.getTime() - d.getTime();
+  if (diff < 60_000) return 'ahora';
+  if (diff < 3600_000) return `hace ${Math.floor(diff / 60_000)}min`;
+  if (diff < 86400_000) return `hace ${Math.floor(diff / 3600_000)}h`;
+  return d.toLocaleDateString('es', { day: 'numeric', month: 'short' });
+}
+
+export function formatTimePrivate(dateString: string): string {
+  const d = new Date(dateString);
   const now = new Date();
   const diff = now.getTime() - d.getTime();
   if (diff < 60_000) return 'ahora';
